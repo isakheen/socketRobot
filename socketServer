@@ -3,12 +3,12 @@ import socket
 
 def func_plocka_kub(x, y):
     print("plocka kub på plats (" + str(x) + ", " + str(y) + ")")
-    print(x+y)
 
 
 def server_program():
+    print("starting server")
     # get the hostname
-    host = "92.35.88.68"
+    host = "127.0.0.1"
     port = 5000  # initiate port no above 1024
 
     server_socket = socket.socket()  # get instance
