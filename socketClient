@@ -1,24 +1,91 @@
 import socket
+import tkinter as tk
+from time import sleep
+
+cube_width = 50
+cube_height = 50
+buffer = 10
+lista = ["red", "red", "red", "green", "blue", "yellow"]
+
+
+def change_value(value, value_sub):
+    new_value = value - value_sub
+    return new_value
+
+
+red_coord = "(1, 2)"
+green_coord = "(3, 4)"
+blue_coord = "(5, 6)"
+yellow_coord = "(7, 8)"
+
+
+def starta_inlev():
+    print("working")
 
 
 def client_program():
-    host = "92.35.88.68"  # as both code is running on same pc
+    master = tk.Tk()
+    host = "127.0.0.1"  # as both code is running on same pc
     port = 5000  # socket server port number
 
     client_socket = socket.socket()  # instantiate
     client_socket.connect((host, port))  # connect to the server
 
-    message = input(" -> ")  # take input
+    def click(event):
+        frame.focus_set()
+        key2 = event.x, event.y
+        print(key2)
 
-    while message.lower().strip() != 'quit':
-        client_socket.send(message.encode())  # send message
-        data = client_socket.recv(1024).decode()  # receive response
+    def char(event):
+        key1 = repr(event.char)
+        real_g = eval(key1)
 
-        print('Received from server: ' + data)  # show in terminal
+        if real_g == "a":
+            nr_red = 5
+            nr_green = 8
+            nr_blue = 3
+            nr_yellow = 4
+            for i in lista:
+                if i.__contains__("red"):
+                    row = 1
+                    x_coord = nr_red * (cube_width + buffer)
+                    y_coord = (row - 1) * cube_height + row * buffer + cube_height / 2
+                    nr_red -= 1
+                elif i.__contains__("blue"):
+                    row = 2
+                    x_coord = nr_blue * (cube_width + buffer)
+                    y_coord = (row - 1) * cube_height + row * buffer + cube_height / 2
+                    nr_blue -= 1
+                elif i.__contains__("green"):
+                    row = 3
+                    x_coord = nr_green * (cube_width + buffer)
+                    y_coord = (row - 1) * cube_height + row * buffer + cube_height / 2
+                    nr_green -= 1
+                else:
+                    row = 4
+                    x_coord = nr_yellow * (cube_width + buffer)
+                    y_coord = (row - 1) * cube_height + row * buffer + cube_height / 2
+                    nr_yellow -= 1
+                coord = "(" + str(x_coord) + "," + str(int(y_coord)) + ")"
 
-        message = input(" -> ")  # again take input
+                value = "func_plocka_kub" + coord + "\n"
+                client_socket.send(value.encode())
+                print(nr_red)
+                sleep(2)
 
-    client_socket.close()  # close the connection
+    frame = tk.Frame(master, height=500, width=500)
+    frame.bind("<Button-1>", click)
+    frame.bind("<Key>", char)
+    frame.pack()
+
+    master.mainloop()
+
+
+# data = client_socket.recv(1024).decode()  # receive response
+
+# print('Received from server: ' + data)  # show in terminal
+
+# client_socket.close()  # close the connection
 
 
 if __name__ == '__main__':
