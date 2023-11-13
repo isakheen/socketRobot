@@ -1,7 +1,11 @@
 import socket
+from random import random
+from guizero import App, TextBox, PushButton
 import tkinter as tk
 from time import sleep
+import clientGUI
 
+"""
 cube_width = 50
 cube_height = 50
 buffer = 10
@@ -21,16 +25,53 @@ yellow_coord = "(7, 8)"
 
 def starta_inlev():
     print("working")
+"""
 
 
 def client_program():
-    master = tk.Tk()
+    # master = tk.Tk()
     host = "127.0.0.1"  # as both code is running on same pc
     port = 5000  # socket server port number
 
     client_socket = socket.socket()  # instantiate
     client_socket.connect((host, port))  # connect to the server
 
+    def stop_button_action():
+        client_socket.send("func_plocka_kub(3, 4)".encode())
+
+    def starta_inlev_button_action():
+        client_socket.send("Starta inlev".encode())
+
+    def stoppa_inlev_button_action():
+        client_socket.send("Stoppa inlev".encode())
+
+    def utlev_button_action():
+        client_socket.send("Starta utlev".encode())
+
+    def välj_fil_button_action():
+        client_socket.send("Välj fil".encode())
+
+    def status_packning():
+        packning = random()
+        if packning > 0.5:
+            return "PÅGÅR"
+        else:
+            return "PÅGÅR EJ"
+
+    app = App(title="Packningsrobot", layout="grid", width=500, height=350)
+
+    PushButton(app, image="stop_button.png", grid=[0, 0], command=stop_button_action)
+    PushButton(app, image="starta_inlev_button.png", grid=[0, 1], command=starta_inlev_button_action)
+    PushButton(app, image="stoppa_inlev_button.png", grid=[1, 1], command=stoppa_inlev_button_action)
+    PushButton(app, image="utlev_button.png", grid=[0, 2], command=utlev_button_action)
+    PushButton(app, image="välj_fil_button.png", grid=[1, 2], command=välj_fil_button_action)
+    TextBox(app, width=30, height=7, multiline=True, text="PACKNING\n" + "          " + status_packning(), grid=[2, 0])
+    TextBox(app, width=40, height=3, multiline=True, text="Status,\nkommande\nkuber, whatever-", grid=[2, 2])
+
+    app.display()
+
+
+"""
     def click(event):
         frame.focus_set()
         key2 = event.x, event.y
@@ -79,7 +120,7 @@ def client_program():
     frame.pack()
 
     master.mainloop()
-
+"""
 
 # data = client_socket.recv(1024).decode()  # receive response
 
