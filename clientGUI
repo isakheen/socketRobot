@@ -1,0 +1,35 @@
+from random import random
+from guizero import App, TextBox, PushButton
+
+
+def stop_button_action():
+    client_socket.send("Stop".encode())
+def starta_inlev_button_action():
+    client_socket.send("Starta inlev".encode())
+def stoppa_inlev_button_action():
+    client_socket.send("Stoppa inlev".encode())
+def utlev_button_action():
+    client_socket.send("Starta utlev".encode())
+def välj_fil_button_action():
+    client_socket.send("Välj fil".encode())
+def status_packning():
+    packning = random()
+    if packning > 0.5:
+        return "PÅGÅR"
+    else:
+        return "PÅGÅR EJ"
+
+
+app = App(title="Packningsrobot", layout="grid", width=500, height=350)
+
+stop_button = PushButton(app, image="stop_button.png", grid=[0, 0])
+starta_inlev_button = PushButton(app, image="starta_inlev_button.png", grid=[0, 1])
+stoppa_inlev_button = PushButton(app, image="stoppa_inlev_button.png", grid=[1, 1])
+utlev_button = PushButton(app, image="utlev_button.png", grid=[0, 2])
+välj_fil_button = PushButton(app, image="välj_fil_button.png", grid=[1, 2])
+status_packning_box = TextBox(app, width=30, height=7, multiline=True,
+                              text="PACKNING\n" + "          " + status_packning(), grid=[2, 0])
+status_allmänt_box = TextBox(app, width=40, height=3, multiline=True, text="Status,\nkommande\nkuber, whatever-",
+                             grid=[2, 2])
+
+app.display()
