@@ -37,19 +37,32 @@ def client_program():
     client_socket.connect((host, port))  # connect to the server
 
     def stop_button_action():
+        color_reset()
+        stop_button.text_color = "blue"
         client_socket.send("func_plocka_kub(3, 4)".encode())
 
     def starta_inlev_button_action():
+        color_reset()
+        starta_inlev_button.text_color = "blue"
         client_socket.send("Starta inlev".encode())
 
     def stoppa_inlev_button_action():
+        color_reset()
+        stoppa_inlev_button.text_color = "blue"
         client_socket.send("Stoppa inlev".encode())
 
     def utlev_button_action():
+        color_reset()
+        utlev_button.text_color = "blue"
         client_socket.send("Starta utlev".encode())
 
     def välj_fil_button_action():
+        color_reset()
+        välj_fil_button.text_color = "blue"
         client_socket.send("Välj fil".encode())
+
+    def color_reset():
+        app.text_color = "black"
 
     def status_packning():
         packning = random()
@@ -59,12 +72,11 @@ def client_program():
             return "PÅGÅR EJ"
 
     app = App(title="Packningsrobot", layout="grid", width=500, height=350)
-
-    PushButton(app, image="stop_button.png", grid=[0, 0], command=stop_button_action)
-    PushButton(app, image="starta_inlev_button.png", grid=[0, 1], command=starta_inlev_button_action)
-    PushButton(app, image="stoppa_inlev_button.png", grid=[1, 1], command=stoppa_inlev_button_action)
-    PushButton(app, image="utlev_button.png", grid=[0, 2], command=utlev_button_action)
-    PushButton(app, image="välj_fil_button.png", grid=[1, 2], command=välj_fil_button_action)
+    stop_button = PushButton(app, width=10, height=4, text="STOPP", grid=[0, 0], command=stop_button_action)
+    starta_inlev_button = PushButton(app, text="STARTA INLEVERANS", grid=[0, 1], command=starta_inlev_button_action)
+    stoppa_inlev_button = PushButton(app, text="STOPPA INLEVERANS", grid=[1, 1], command=stoppa_inlev_button_action)
+    utlev_button = PushButton(app, text="UTLEVERANS", grid=[0, 2], command=utlev_button_action)
+    välj_fil_button = PushButton(app, text="VÄLJ FIL", grid=[1, 2], command=välj_fil_button_action)
     TextBox(app, width=30, height=7, multiline=True, text="PACKNING\n" + "          " + status_packning(), grid=[2, 0])
     TextBox(app, width=40, height=3, multiline=True, text="Status,\nkommande\nkuber, whatever-", grid=[2, 2])
 
