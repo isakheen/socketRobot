@@ -1,0 +1,26 @@
+[
+  {
+    "Name": "Green Cube",
+    "Price": "80",
+    "Short Description": "Green",
+    "Quantity": "2"
+  },
+  {
+    "Name": "Blue Cube",
+    "Price": "20",
+    "Short Description": "Blue",
+    "Quantity": "4"
+  },
+  {
+    "Name": "Yellow Cube",
+    "Price": "60",
+    "Short Description": "Yellow",
+    "Quantity": "3"
+  },
+  {
+    "Name": "Red cube",
+    "Price": "199",
+    "Short Description": "Red",
+    "Quantity": "1"
+  }
+]
