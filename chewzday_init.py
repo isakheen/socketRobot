@@ -13,6 +13,11 @@ target_y = -76.48391723632812
 target_z = 11.184303283691406
 target = [target_x, target_y, target_z]
 
+colorSens_x = 162.2412109375
+colorSens_y = -163.2942352294922
+colorSens_z = 16.308555603027344
+colorSens = [colorSens_x, colorSens_y, colorSens_z]
+
 blue_x = 116.79029083251953
 blue_y = -176.5496063232422
 blue_z = -47.93147277832031
@@ -164,16 +169,26 @@ def check_ir():
             change_values("off")
             break
         
-        printa = bot.interface.send1([0xaa,0xaa,0x04,0x8a,0x00,0x02,0x00,0x74])
+        printa = bot.interface.sendIR([0xaa,0xaa,0x04,0x8a,0x00,0x02,0x00,0x74])
         if printa[0] == 1:
             change_values("off")
             break
     return status
         
 ################Funktioner för RPI#############################################        
-    
-def starta_inlev(antal_av_varje):
-    colors = ["blue", "yellow", "red", "green"]
+def check_color():
+    status = bot.interface.sendColor([0xaa,0xaa,0x03,0x89,0x00,0x01,0x76])
+    if status[0] == 1:
+        return "red"
+    elif status[1] == 1:
+        return "green"
+    elif status[2] == 1:
+        return "blue"
+    else:
+        return "yellow"
+
+def starta_inlev():
+    #colors = ["blue", "yellow", "red", "green"]
     color = ["Blue Cube", "Yellow Cube", "Red Cube", "Green Cube"]
     bot.move_to_relative(1, 1, 1, 0)
     to_target(target)
@@ -184,13 +199,17 @@ def starta_inlev(antal_av_varje):
             break
         bot.move_to_relative(0, 0, -10, 0)
         bot.interface.set_end_effector_suction_cup(1, 1)
-        column = check_inv(colors[i])
-        update_inventory(color[i], colors[i], 1, "add", plockade)
-        column = check_inv(colors[i])
-        if column == antal_av_varje:
+        to_target(colorSens)
+        sleep(2)
+        colorRead = check_color()
+        column = check_inv(colorRead)
+        update_inventory(color[i], colorRead, 1, "add", plockade)
+        column = check_inv(colorRead)
+        """
+        if column == 9:
             i += 1
             column = 0
-            
+        """
 def plocka_kub(color, column):
     to_cube(color, column, "utlev")
     
