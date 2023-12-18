@@ -7,8 +7,6 @@ from guizero import App, TextBox, PushButton
 
 cred = credentials.Certificate("/Users/isakheen/Desktop/e-web-7c05b-39c461a6e3ef.json")
 firebase_admin.initialize_app(cred)
-
-
 def list_to_string(list_to_convert):
     return_string = "["
     for i in range(len(list_to_convert)):
@@ -51,7 +49,6 @@ def get_inventory():
     db = firestore.client()
     doc = db.collection(u'inventory').document(u'red').get()
     docString = str(doc.to_dict())
-    print(docString)
     inv_list[0] = int(docString[-2])
 
     db = firestore.client()
@@ -147,11 +144,14 @@ def update_inventory(lista):
 
 
 def client_program():
+    """
     host = "127.0.0.1"  # as both code is running on same pc
     port = 5001  # socket server port number
 
     client_socket = socket.socket()  # instantiate
     client_socket.connect((host, port))  # connect to the server
+
+    """
 
     # data = client_socket.recv(1024).decode()  # receive response
 
@@ -168,6 +168,7 @@ def client_program():
         color_reset()
         delivery_button.text_color = "blue"
         send_string = "starta_inlev(" + str(get_inventory()) + ")"
+        delivery = 1
         client_socket.send(send_string.encode())
         data = ""
         while not data.__contains__("klar"):
@@ -200,7 +201,6 @@ def client_program():
         data = ""
         while not data.__contains__("klar"):
             data = client_socket.recv(1024).decode()
-        data = "order packed"
         data = client_socket.recv(1024).decode()  # receive response
         print('Received from server: ' + data)  # show in terminal
 
@@ -214,12 +214,13 @@ def client_program():
     def color_reset():
         app.text_color = "black"
 
-    def status_packning():
-        packning = random()
-        if packning > 0.5:
-            return "PÅGÅR"
+    def action_status():
+        if packing == 1:
+            return "Reading and packing order"
+        elif delivery == 1:
+            return "Cubes are being delivered to the warehous"
         else:
-            return "PÅGÅR EJ"
+            return "No actions performed right now"
 
     app = App(title="Packningsrobot", layout="grid", width=500, height=350)
     start_belt_button = PushButton(app, width=10, height=4, text="START", grid=[0, 0], command=start_belt_button_action)
@@ -229,8 +230,10 @@ def client_program():
     pack_button = PushButton(app, width=10, height=4, text="PACK ORDER", grid=[1, 1], command=pack_button_action)
     left_button = PushButton(app, width=10, height=4, text="<", grid=[0, 2], command=left_button_action)
     right_button = PushButton(app, width=10, height=4, text=">", grid=[1, 2], command=right_button_action)
-    TextBox(app, width=40, height=8, multiline=True, text="PACKNING\n" + "          " + status_packning(), grid=[2, 0])
-    TextBox(app, width=40, height=8, multiline=True, text="Status,\nkommande\nkuber, whatever-", grid=[2, 1])
+    TextBox(app, width=40, height=8, multiline=True, text="Action performed\n" + "action_status()", grid=[2, 0])
+    TextBox(app, width=40, height=8, multiline=True, text="Inventory\nRed:" + str(get_inventory()[0]) +
+    "          Green:" + str(get_inventory()[1]) + "\nBlue:" + str(get_inventory()[2]) + "         Yellow:" +
+    str(get_inventory()[3]), grid=[2, 1])
 
     app.display()
 
