@@ -1,35 +1,239 @@
+import socket
 from random import random
+
+import firebase_admin
+from firebase_admin import credentials, firestore
 from guizero import App, TextBox, PushButton
 
-
-def stop_button_action():
-    client_socket.send("Stop".encode())
-def starta_inlev_button_action():
-    client_socket.send("Starta inlev".encode())
-def stoppa_inlev_button_action():
-    client_socket.send("Stoppa inlev".encode())
-def utlev_button_action():
-    client_socket.send("Starta utlev".encode())
-def välj_fil_button_action():
-    client_socket.send("Välj fil".encode())
-def status_packning():
-    packning = random()
-    if packning > 0.5:
-        return "PÅGÅR"
-    else:
-        return "PÅGÅR EJ"
+cred = credentials.Certificate("/Users/isakheen/Desktop/e-web-7c05b-39c461a6e3ef.json")
+firebase_admin.initialize_app(cred)
 
 
-app = App(title="Packningsrobot", layout="grid", width=500, height=350)
+def list_to_string(list_to_convert):
+    return_string = "["
+    for i in range(len(list_to_convert)):
+        if i != 3:
+            return_string += str(list_to_convert[i]) + ","
+        else:
+            return_string += str(list_to_convert[i]) + "]"
+    print(return_string)
+    return return_string
 
-stop_button = PushButton(app, image="stop_button.png", grid=[0, 0])
-starta_inlev_button = PushButton(app, image="starta_inlev_button.png", grid=[0, 1])
-stoppa_inlev_button = PushButton(app, image="stoppa_inlev_button.png", grid=[1, 1])
-utlev_button = PushButton(app, image="utlev_button.png", grid=[0, 2])
-välj_fil_button = PushButton(app, image="välj_fil_button.png", grid=[1, 2])
-status_packning_box = TextBox(app, width=30, height=7, multiline=True,
-                              text="PACKNING\n" + "          " + status_packning(), grid=[2, 0])
-status_allmänt_box = TextBox(app, width=40, height=3, multiline=True, text="Status,\nkommande\nkuber, whatever-",
-                             grid=[2, 2])
 
-app.display()
+def set_inventory(lista):
+    db = firestore.client()
+    doc_ref = db.collection(u'inventory').document(u'red')
+    doc_ref.set({
+        u'quantity': lista[0]
+    })
+
+    db = firestore.client()
+    doc_ref = db.collection(u'inventory').document(u'green')
+    doc_ref.set({
+        u'quantity': lista[1]
+    })
+
+    db = firestore.client()
+    doc_ref = db.collection(u'inventory').document(u'blue')
+    doc_ref.set({
+        u'quantity': lista[2]
+    })
+
+    db = firestore.client()
+    doc_ref = db.collection(u'inventory').document(u'yellow')
+    doc_ref.set({
+        u'quantity': lista[3]
+    })
+
+
+def get_inventory():
+    inv_list = [0, 0, 0, 0]
+    db = firestore.client()
+    doc = db.collection(u'inventory').document(u'red').get()
+    docString = str(doc.to_dict())
+    print(docString)
+    inv_list[0] = int(docString[-2])
+
+    db = firestore.client()
+    doc = db.collection(u'inventory').document(u'green').get()
+    docString = str(doc.to_dict())
+    inv_list[1] = int(docString[-2])
+
+    db = firestore.client()
+    doc = db.collection(u'inventory').document(u'blue').get()
+    docString = str(doc.to_dict())
+    inv_list[2] = int(docString[-2])
+
+    db = firestore.client()
+    doc = db.collection(u'inventory').document(u'yellow').get()
+    docString = str(doc.to_dict())
+    inv_list[3] = int(docString[-2])
+
+    return inv_list
+
+
+def get_order():
+    order_list = [0, 0, 0, 0]
+    db = firestore.client()
+    orders_snapshot = db.collection(u'orders').get()
+    document_name = orders_snapshot[1].id
+    # print(db.collection(u'orders').filter(FieldPath.document_id(), "==", document_name))
+
+    print(document_name)
+    orders_snapshot = db.collection(u'orders').document(document_name).get()
+    order_data = orders_snapshot.to_dict()
+    order_items = order_data.get('items', [])
+
+    for item in order_items:
+        item_name = (item.get('name') or '').lower()
+        item_qty = (item.get('item') or '')
+        if item_name == "red":
+            order_list[0] = item_qty
+        if item_name == "green":
+            order_list[1] = item_qty
+        if item_name == "blue":
+            order_list[2] = item_qty
+        if item_name == "yellow":
+            order_list[3] = item_qty
+
+    db.collection(u'orders').document(document_name).delete()
+    return order_list
+
+
+def update_inventory(lista):
+    db = firestore.client()
+    doc = db.collection(u'inventory').document(u'red').get()
+    docString = str(doc.to_dict())
+    old_quantity = int(docString[-2])
+    new_quantity = old_quantity + lista[0]
+
+    doc_ref = db.collection(u'inventory').document(u'red')
+    doc_ref.set({
+        u'quantity': new_quantity
+    })
+
+    db = firestore.client()
+    doc = db.collection(u'inventory').document(u'green').get()
+    docString = str(doc.to_dict())
+    old_quantity = int(docString[-2])
+    new_quantity = old_quantity + lista[1]
+
+    doc_ref = db.collection(u'inventory').document(u'green')
+    doc_ref.set({
+        u'quantity': new_quantity
+    })
+
+    db = firestore.client()
+    doc = db.collection(u'inventory').document(u'blue').get()
+    docString = str(doc.to_dict())
+    old_quantity = int(docString[-2])
+    new_quantity = old_quantity + lista[2]
+
+    doc_ref = db.collection(u'inventory').document(u'blue')
+    doc_ref.set({
+        u'quantity': new_quantity
+    })
+
+    db = firestore.client()
+    doc = db.collection(u'inventory').document(u'yellow').get()
+    docString = str(doc.to_dict())
+    old_quantity = int(docString[-2])
+    new_quantity = old_quantity + lista[3]
+
+    doc_ref = db.collection(u'inventory').document(u'yellow')
+    doc_ref.set({
+        u'quantity': new_quantity
+    })
+
+
+def client_program():
+    host = "127.0.0.1"  # as both code is running on same pc
+    port = 5001  # socket server port number
+
+    client_socket = socket.socket()  # instantiate
+    client_socket.connect((host, port))  # connect to the server
+
+    # data = client_socket.recv(1024).decode()  # receive response
+
+    # print('Received from server: ' + data)  # show in terminal
+
+    # client_socket.close()  # close the connection
+
+    def start_belt_button_action():
+        color_reset()
+        start_belt_button.text_color = "blue"
+        client_socket.send("change_values(\"on\")".encode())
+
+    def delivery_button_action():
+        color_reset()
+        delivery_button.text_color = "blue"
+        send_string = "starta_inlev(" + str(get_inventory()) + ")"
+        client_socket.send(send_string.encode())
+        data = ""
+        while not data.__contains__("klar"):
+            data = client_socket.recv(1024).decode()
+        return_list = [int(data[5]), int(data[6]), int(data[7]), int(data[8])]
+        set_inventory(return_list)
+
+    def stop_belt_button_action():
+        color_reset()
+        stop_belt_button.text_color = "blue"
+        client_socket.send("change_values(\"off\")".encode())
+        data = client_socket.recv(1024).decode()  # receive response
+        print('Received from server: ' + data)  # show in terminal
+
+    def left_button_action():
+        color_reset()
+        left_button.text_color = "blue"
+        client_socket.send("change_values(\"left\")".encode())
+        data = client_socket.recv(1024).decode()  # receive response
+        print('Received from server: ' + data)  # show in terminal
+
+    def pack_button_action():
+        color_reset()
+        pack_button.text_color = "blue"
+        order_list = get_order()
+        inventory_list = get_inventory()
+        order_string = "plocka_kub(" + list_to_string(inventory_list) + "," + list_to_string(order_list) + ")"
+        print(order_string)
+        client_socket.send(order_string.encode())
+        data = ""
+        while not data.__contains__("klar"):
+            data = client_socket.recv(1024).decode()
+        data = "order packed"
+        data = client_socket.recv(1024).decode()  # receive response
+        print('Received from server: ' + data)  # show in terminal
+
+    def right_button_action():
+        color_reset()
+        right_button.text_color = "blue"
+        client_socket.send("change_values(\"right\")".encode())
+        data = client_socket.recv(1024).decode()  # receive response
+        print('Received from server: ' + data)  # show in terminal
+
+    def color_reset():
+        app.text_color = "black"
+
+    def status_packning():
+        packning = random()
+        if packning > 0.5:
+            return "PÅGÅR"
+        else:
+            return "PÅGÅR EJ"
+
+    app = App(title="Packningsrobot", layout="grid", width=500, height=350)
+    start_belt_button = PushButton(app, width=10, height=4, text="START", grid=[0, 0], command=start_belt_button_action)
+    delivery_button = PushButton(app, width=10, height=4, text="START DELIVERY", grid=[0, 1],
+                                 command=delivery_button_action)
+    stop_belt_button = PushButton(app, width=10, height=4, text="STOP", grid=[1, 0], command=stop_belt_button_action)
+    pack_button = PushButton(app, width=10, height=4, text="PACK ORDER", grid=[1, 1], command=pack_button_action)
+    left_button = PushButton(app, width=10, height=4, text="<", grid=[0, 2], command=left_button_action)
+    right_button = PushButton(app, width=10, height=4, text=">", grid=[1, 2], command=right_button_action)
+    TextBox(app, width=40, height=8, multiline=True, text="PACKNING\n" + "          " + status_packning(), grid=[2, 0])
+    TextBox(app, width=40, height=8, multiline=True, text="Status,\nkommande\nkuber, whatever-", grid=[2, 1])
+
+    app.display()
+
+
+if __name__ == '__main__':
+    client_program()
