@@ -1,25 +1,45 @@
 import socket
-from random import random
+from time import sleep
 
 import firebase_admin
 from firebase_admin import credentials, firestore
 from guizero import App, TextBox, PushButton
+from datetime import datetime
 
-cred = credentials.Certificate("/Users/isakheen/Desktop/e-web-7c05b-39c461a6e3ef.json")
+cred = credentials.Certificate("e-web-7c05b-39c461a6e3ef.json")
 firebase_admin.initialize_app(cred)
-action_status = [0,0]
+action_status = [0, 0]
+
+
+def file_writer(string_to_write):
+    # datetime object containing current date and time
+    now = datetime.now()
+
+    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    print("date and time =", dt_string)
+
+    with open("log_file.txt", "a") as file:
+        file.write(dt_string + "\n" + string_to_write + "\n\n")
+    file.close()
+
+file_writer("Me is performing action doing fghgfg thing")
 
 def set_delivery(number):
     action_status[0] = number
 
+
 def get_delivery():
     return action_status[0]
+
 
 def set_packing(number):
     action_status[1] = number
 
+
 def get_packing():
     return action_status[1]
+
+
 def list_to_string(list_to_convert):
     return_string = "["
     for i in range(len(list_to_convert)):
@@ -83,10 +103,11 @@ def get_inventory():
 
 
 def get_order():
+    inv_flag = 0
     order_list = [0, 0, 0, 0]
     db = firestore.client()
     orders_snapshot = db.collection(u'orders').get()
-    document_name = orders_snapshot[1].id
+    document_name = orders_snapshot[0].id
     # print(db.collection(u'orders').filter(FieldPath.document_id(), "==", document_name))
 
     print(document_name)
@@ -106,8 +127,15 @@ def get_order():
         if item_name == "yellow":
             order_list[3] = item_qty
 
-    db.collection(u'orders').document(document_name).delete()
-    return order_list
+    for i in range(len(order_list)):
+        if get_inventory()[i] < int(order_list[i]):
+            inv_flag = 1
+
+    if inv_flag == 0:
+        # db.collection(u'orders').document(document_name).delete()
+        return order_list
+
+    return "Insufficient inventory"
 
 
 def update_inventory(lista):
@@ -155,11 +183,10 @@ def update_inventory(lista):
         u'quantity': new_quantity
     })
 
-
+"""
 def client_program():
-
     host = "127.0.0.1"  # as both code is running on same pc
-    port = 5001  # socket server port number
+    port = 5000  # socket server port number
 
     client_socket = socket.socket()  # instantiate
     client_socket.connect((host, port))  # connect to the server
@@ -180,11 +207,14 @@ def client_program():
         delivery_button.text_color = "blue"
         send_string = "starta_inlev(" + str(get_inventory()) + ")"
         set_delivery(1)
+        action_text_box_action(1)
         client_socket.send(send_string.encode())
         data = ""
         while not data.__contains__("klar"):
             data = client_socket.recv(1024).decode()
         set_delivery(0)
+        action_text_box_action(1)
+        inventory_text_box_action()
         return_list = [int(data[5]), int(data[6]), int(data[7]), int(data[8])]
         set_inventory(return_list)
 
@@ -206,17 +236,24 @@ def client_program():
         color_reset()
         pack_button.text_color = "blue"
         order_list = get_order()
-        inventory_list = get_inventory()
-        order_string = "plocka_kub(" + list_to_string(inventory_list) + "," + list_to_string(order_list) + ")"
-        print(order_string)
-        set_packing(1)
-        client_socket.send(order_string.encode())
-        data = ""
-        while not data.__contains__("klar"):
-            data = client_socket.recv(1024).decode()
-        set_packing(0)
-        data = client_socket.recv(1024).decode()  # receive response
-        print('Received from server: ' + data)  # show in terminal
+        if order_list != "Insufficient inventory":
+            inventory_list = get_inventory()
+            order_string = "plocka_kub(" + list_to_string(inventory_list) + "," + list_to_string(order_list) + ")"
+            print(order_string)
+            set_packing(1)
+            action_text_box_action(1)
+            client_socket.send(order_string.encode())
+            data = ""
+            while not data.__contains__("klar"):
+                data = client_socket.recv(1024).decode()
+            set_packing(0)
+            action_text_box_action(1)
+            inventory_text_box_action()
+            data = client_socket.recv(1024).decode()  # receive response
+            print('Received from server: ' + data)  # show in terminal
+
+        else:
+            action_text_box_action(2)
 
     def right_button_action():
         color_reset()
@@ -225,12 +262,21 @@ def client_program():
         data = client_socket.recv(1024).decode()  # receive response
         print('Received from server: ' + data)  # show in terminal
 
-    def action_text_box_action():
-        #action_text_box.text
+    def action_text_box_action(number):
+        action_text_box.clear()
+        if number == 1:
+            action_text_box.append("Action performed\n" + action_status())
+
+        if number == 2:
+            action_text_box.append(
+                "Action performed\n" + action_status() + "\n" + "Insufficient inventory,\nperform delivery")
 
     def inventory_text_box_action():
-
-
+        inventory_text_box.clear()
+        inventory_text_box.append("Inventory\nRed:" + str(get_inventory()[0]) +
+                                  "          Green:" + str(get_inventory()[1]) + "\nBlue:" + str(
+            get_inventory()[2]) + "         Yellow:" +
+                                  str(get_inventory()[3]))
 
     def color_reset():
         app.text_color = "black"
@@ -251,13 +297,17 @@ def client_program():
     pack_button = PushButton(app, width=10, height=4, text="PACK ORDER", grid=[1, 1], command=pack_button_action)
     left_button = PushButton(app, width=10, height=4, text="<", grid=[0, 2], command=left_button_action)
     right_button = PushButton(app, width=10, height=4, text=">", grid=[1, 2], command=right_button_action)
-    action_text_box = TextBox(app, width=40, height=8, multiline=True, text="Action performed\n" + action_status(), grid=[2, 0], command=delivery_button_action)
-    inventory_text_box = TextBox(app, width=40, height=8, multiline=True, text="Inventory\nRed:" + str(get_inventory()[0]) +
-    "          Green:" + str(get_inventory()[1]) + "\nBlue:" + str(get_inventory()[2]) + "         Yellow:" +
-    str(get_inventory()[3]), grid=[2, 1], command=pack_button_action)
+    action_text_box = TextBox(app, width=40, height=8, multiline=True, text="\nAction performed\n" + action_status(),
+                              grid=[2, 0])
+    inventory_text_box = TextBox(app, width=40, height=8, multiline=True,
+                                 text="\nInventory\nRed:" + str(get_inventory()[0]) +
+                                      "          Green:" + str(get_inventory()[1]) + "\nBlue:" + str(
+                                     get_inventory()[2]) + "         Yellow:" +
+                                      str(get_inventory()[3]), grid=[2, 1])
 
     app.display()
 
 
 if __name__ == '__main__':
     client_program()
+"""
