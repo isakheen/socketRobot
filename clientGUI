@@ -119,13 +119,13 @@ def get_order():
         item_name = (item.get('name') or '').lower()
         item_qty = (item.get('item') or '')
         if item_name == "red":
-            order_list[0] = item_qty
+            order_list[0] = int(order_list[0]) + item_qty
         if item_name == "green":
-            order_list[1] = item_qty
+            order_list[1] = int(order_list[1]) + item_qty
         if item_name == "blue":
-            order_list[2] = item_qty
+            order_list[2] = int(order_list[2]) + item_qty
         if item_name == "yellow":
-            order_list[3] = item_qty
+            order_list[3] = int(order_list[3]) + item_qty
 
     for i in range(len(order_list)):
         if get_inventory()[i] < int(order_list[i]):
