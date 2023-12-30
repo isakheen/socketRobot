@@ -1,16 +1,5 @@
-check i server, inte fler än 8 i en rad (inventory_list[i] + inlev_list[i] !> 8)
-om >8, tillbaka på band, fortsätt rulla och skriv i app "lager för färg fullt"
-om 8 på alla färger, avsluta inlev, kanske skriva "hela lagret fullt"
-
-se till så att logik för plock och inlev fungerar med index från order och lager
-
-max 4 kuber i ett kolli, fixa på något sätt
-om plockade == 4, kör bandet lite, plockade = 0
-
 skriv till appen om order packad eller inlev färdig osv
 
 skriva till loggfil på lämpliga ställen (inlev, utlev med färger)
 
 städa och snygga till kod med kommentarer osv, ta bort onödiga saker
-
-se till att ALLT från RPI finns på github
