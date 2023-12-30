@@ -18,7 +18,7 @@ def client_program():
     def start_belt_button_action():
         color_reset()
         start_belt_button.text_color = "blue"
-        client_socket.send("change_values(\"on\")".encode())
+        client_socket.send("set_belt(\"on\")".encode())
         client_file_writer("starting belt")
 
     def restock_button_action():
@@ -44,7 +44,7 @@ def client_program():
     def stop_belt_button_action():
         color_reset()
         stop_belt_button.text_color = "blue"
-        client_socket.send("change_values(\"off\")".encode())
+        client_socket.send("set_belt(\"off\")".encode())
         client_file_writer("stopping belt")
         data = client_socket.recv(1024).decode()  # receive response
         print('Received from server: ' + data)  # show in terminal
@@ -53,7 +53,7 @@ def client_program():
     def left_button_action():
         color_reset()
         left_button.text_color = "blue"
-        client_socket.send("change_values(\"left\")".encode())
+        client_socket.send("set_belt(\"left\")".encode())
         client_file_writer("changing belt direction to left")
         data = client_socket.recv(1024).decode()  # receive response
         print('Received from server: ' + data)  # show in terminal
@@ -90,7 +90,7 @@ def client_program():
     def right_button_action():
         color_reset()
         right_button.text_color = "blue"
-        client_socket.send("change_values(\"right\")".encode())
+        client_socket.send("set_belt(\"right\")".encode())
         client_file_writer("changing belt direction to right")
         data = client_socket.recv(1024).decode()  # receive response
         print('Received from server: ' + data)  # show in terminal
