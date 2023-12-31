@@ -29,22 +29,22 @@ color_sens = [color_sens_x, color_sens_y, color_sens_z]
 
 # coordinates for the first column of the cubes, the rest are placed according to buffer below
 red_x = 116.79029083251953
-red_y = -255
+red_y = -185
 red_z = -47.93147277832031
 red = [red_x, red_y, red_z]
 
 green_x = 116.79029083251953
-green_y = -290
+green_y = -220
 green_z = -47.93147277832031
 green = [green_x, green_y, green_z]
 
 blue_x = 116.79029083251953
-blue_y = -185
+blue_y = -255
 blue_z = -47.93147277832031
 blue = [blue_x, blue_y, blue_z]
 
 yellow_x = 116.79029083251953
-yellow_y = -220
+yellow_y = -290
 yellow_z = -47.93147277832031
 yellow = [yellow_x, yellow_y, yellow_z]
 
@@ -137,7 +137,7 @@ def move_cube(color, column, action, packed):
     status = action
     curr_pos = get_curr_pos()
     move_arm_z(5)
-    # the reach the cubes further away we have to change the movement
+    # to reach the cubes further away we have to change the movement
     if color == blue or color == yellow:
         if status == "packing":
             if packed == 3:
