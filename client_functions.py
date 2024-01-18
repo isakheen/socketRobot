@@ -4,8 +4,6 @@ from firebase_admin import credentials, firestore
 
 cred = credentials.Certificate("e-web-7c05b-39c461a6e3ef.json")
 firebase_admin.initialize_app(cred)
-# used to help action_text_box, [delivery, packing], 0 = no, 1 = yes
-action_status = [0, 0]
 
 
 # writes to our client log file
@@ -18,22 +16,6 @@ def client_file_writer(string_to_write):
     with open("client_log_file.txt", "a") as file:
         file.write(dt_string + "\n" + string_to_write + "\n\n")
     file.close()
-
-
-def set_restock(number):
-    action_status[0] = number
-
-
-def get_delivery():
-    return action_status[0]
-
-
-def set_packing(number):
-    action_status[1] = number
-
-
-def get_packing():
-    return action_status[1]
 
 
 def list_to_string(list_to_convert):
@@ -108,6 +90,9 @@ def get_order():
     order_list = [0, 0, 0, 0]
     db = firestore.client()
     orders = db.collection(u'orders').get()
+    if not orders:
+        return "No order to fetch"
+
     document_name = orders[0].id
 
     orders = db.collection(u'orders').document(document_name).get()
@@ -119,13 +104,13 @@ def get_order():
         item_name = (item.get('name') or '').lower()
         item_qty = (item.get('item') or '')
         if item_name == "red":
-            order_list[0] = int(order_list[0]) + item_qty
+            order_list[0] = int(order_list[0]) + int(item_qty)
         if item_name == "green":
-            order_list[1] = int(order_list[1]) + item_qty
+            order_list[1] = int(order_list[1]) + int(item_qty)
         if item_name == "blue":
-            order_list[2] = int(order_list[2]) + item_qty
+            order_list[2] = int(order_list[2]) + int(item_qty)
         if item_name == "yellow":
-            order_list[3] = int(order_list[3]) + item_qty
+            order_list[3] = int(order_list[3]) + int(item_qty)
 
     for i in range(len(order_list)):
         if get_inventory()[i] < int(order_list[i]):
@@ -136,4 +121,5 @@ def get_order():
         db.collection(u'orders').document(document_name).delete()
         return order_list
 
+    client_file_writer(list_to_string(order_list))
     return "Insufficient inventory"
